@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/rcanaswaseem/jx-azure-php:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/rcanaswaseem/jx-azure-php:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jx-azure-php
+        chartPath: charts/jx-azure-php
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/rcanaswaseem/jx-azure-php'
+          image.tag: '{{.DIGEST_HEX}}'
